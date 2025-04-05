@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doc2ments</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .toolbar {
+            background: #1e1e1e;
+            padding: 10px;
+            width: 100%;
+            display: flex;
+            gap: 10px;
+            position: fixed;
+            top: 0;
+        }
+        button {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #444;
+        }
+        button.active {
+            background: #555;
+        }
+        .editor {
+            width: 90%;
+            min-height: 80vh;
+            margin-top: 50px;
+            background: #1e1e1e;
+            padding: 10px;
+            border: none;
+            outline: none;
+            color: white;
+            font-size: 16px;
+            overflow-y: auto;
+            max-height: calc(100vh - 70px);
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <button id="bold" onclick="toggleFormat('bold')">Bold</button>
+        <button id="italic" onclick="toggleFormat('italic')">Italic</button>
+        <button id="underline" onclick="toggleFormat('underline')">Underline</button>
+        <button id="import" onclick="importFile()">Import Text</button>
+        <input type="file" id="fileInput" accept=".txt" style="display: none" onchange="handleFileSelect(event)">
+    </div>
+    <div contenteditable="true" class="editor" id="editor" onkeyup="updateButtons(); saveText()" onclick="updateButtons()"></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (localStorage.getItem("savedText")) {
+                document.getElementById("editor").innerHTML = localStorage.getItem("savedText");
+            }
+        });
+
+        function toggleFormat(command) {
+            document.execCommand(command, false, null);
+            updateButtons();
+            saveText();
+        }
+
+        function updateButtons() {
+            document.getElementById('bold').classList.toggle('active', document.queryCommandState('bold'));
+            document.getElementById('italic').classList.toggle('active', document.queryCommandState('italic'));
+            document.getElementById('underline').classList.toggle('active', document.queryCommandState('underline'));
+        }
+
+        function saveText() {
+            localStorage.setItem("savedText", document.getElementById("editor").innerHTML);
+        }
+
+        function importFile() {
+            document.getElementById('fileInput').click();
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file && file.type === 'text/plain') {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById("editor").innerHTML = e.target.result;
+                    saveText(); // Save the imported text to localStorage
+                };
+                reader.readAsText(file);
+            } else {
+                alert("Please select a valid .txt file.");
+            }
+        }
+    </script>
+</body>
+</html>
